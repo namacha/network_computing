@@ -1,0 +1,7 @@
+server: udp_server.c
+	gcc -o server udp_server.c
+
+client: udp_client.c
+	gcc -o client udp_client.c
+
+all: server client

@@ -6,6 +6,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#define PORT 8809
+
+
 int main(void){
 
     int sock;
@@ -22,7 +25,7 @@ int main(void){
     sock = socket(AF_INET, SOCK_DGRAM, 0);
 
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(8809);
+    addr.sin_port = htons(PORT);
     addr.sin_addr.s_addr = INADDR_ANY;
 
     setsockopt(
@@ -35,11 +38,17 @@ int main(void){
 
     bind(sock, (struct sockaddr *)&addr, sizeof(addr));
 
+    printf("Server established on PORT %d\n", PORT);
+
     while(1){
 
         memset(buf, 0, sizeof(buf));
         addrlen = sizeof(sender);
         n = recvfrom(sock, buf, sizeof(buf) - 1, 0, (struct sockaddr *)&sender, &addrlen);
+
+
+//        connect(sock, (struct sockaddr *)&sender, addrlen);
+        sendto(sock, buf, sizeof(buf), 0, (struct sockaddr *)&sender, sizeof(sender));
 
         inet_ntop(AF_INET, &sender.sin_addr, sender_str, sizeof(sender_str));
         
