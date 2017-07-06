@@ -33,7 +33,7 @@ int main(void){
     char fname[256];
     char fname_with_path[256];
     char *token;
-    int n;
+    long int n;
 
     int result;
 
@@ -77,12 +77,12 @@ int main(void){
             panic("ACK: fname");
 
 
-        long long int sent_bytes = 0;
+        long int sent_bytes = 0;
         off_t fsize = lseek(fd, 0, SEEK_END);
         lseek(fd, 0, SEEK_SET);
         char fsize_c[256];
 
-        printf("fsize: %lld\n", (long long int)fsize);
+        printf("fsize: %ld\n", (long int)fsize);
 
         sprintf(fsize_c, "%d", (int)fsize);
 
@@ -92,18 +92,18 @@ int main(void){
         if(!strcmp(buf, ACK))
             panic("ACK: fsize");
 
-        while(sent_bytes < (long long int)fsize){
-            if((long long int)fsize - sent_bytes > FILE_BUFSIZE){
+        while(sent_bytes < (long int)fsize){
+            if((long int)fsize - sent_bytes >= FILE_BUFSIZE){
                 n = read(fd, buf, FILE_BUFSIZE);
                 write(sock, buf, n);
-                lseek(fd, FILE_BUFSIZE, SEEK_CUR);
+                //lseek(fd, FILE_BUFSIZE, SEEK_CUR);
             }else{
-                n = read(fd, buf, FILE_BUFSIZE);
+                n = read(fd, buf, (long int)fsize - sent_bytes);
                 write(sock, buf, n);
-                lseek(fd, n, SEEK_CUR);
+                //lseek(fd, n, SEEK_CUR);
             }
             sent_bytes += n;
-            printf("%lld\r", sent_bytes);
+            printf("%ld\r", sent_bytes);
         }
 
         n = read(sock, buf, sizeof(buf));

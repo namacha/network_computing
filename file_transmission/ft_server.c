@@ -40,7 +40,7 @@ int main(int argc,char *argv[]){
     char fname[256];
 
     int pid, cpid;
-    int n;
+    long int n;
 
     int yes = 1;
 
@@ -103,20 +103,19 @@ int main(int argc,char *argv[]){
               write(client_sock, ACK, sizeof(ACK));
 
               n = read(client_sock, buf, sizeof(buf));
-              long long int fsize = atoll(buf);
-              printf("file size: %lld\n", fsize);
+              long int fsize = atoll(buf);
+              printf("file size: %ld\n", fsize);
               if (n < 0)
                   panic("read");
               write(client_sock, ACK, 1);
 
               int fd = open(fname, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP);
-              long long int done_bytes = 0;
-              while(done_bytes <= fsize){
+              long int done_bytes = 0;
+              while(done_bytes < fsize){
                   n = read(client_sock, buf, sizeof(buf));
                   if (n < 0)
                       panic("read");
                   write(fd, buf, n);
-                  lseek(fd, n, SEEK_CUR);
                   done_bytes += n;
               }
 
