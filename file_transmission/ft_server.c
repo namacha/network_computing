@@ -90,40 +90,14 @@ int main(int argc,char *argv[]){
         if (pid == 0){
             while(1){
 
-              n = read(client_sock, buf, sizeof(buf));
-              if (n < 0)
-                  panic("read");
-              printf("file name: %s\n", buf);
-              strcpy(fname, buf);
-              write(client_sock, ACK, 1);
-
-              n = read(client_sock, buf, sizeof(buf));
-              long int fsize = atoll(buf);
-              printf("file size: %ld\n", fsize);
-              if (n < 0)
-                  panic("read");
-              write(client_sock, ACK, 1);
-
-              int fd = open(fname, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP);
-              long int bytes_to_receive = fsize;
-              while(bytes_to_receive){
-                  n = read(client_sock, buf, sizeof(buf));
-                  if (n < 0)
-                      panic("read");
-                  write(fd, buf, n);
-                  bytes_to_receive -= n;
-              }
-
-              write(client_sock, ACK, 1);
-
-              close(fd);
-              printf("file transfer completed.\n");
-            
               if(!strcmp(buf, "q")){
                   printf("client disconnected\n");
                   break;
                 }
-              }
+                int result;
+                result = recv_file(client_sock);
+                printf("file transfer completed.\n");
+             }
             }
         }
     close(sock);
