@@ -12,20 +12,16 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include "headers.h"
+
 #define PORT 8808
 #define BUFSIZE 1024
 #define FILE_BUFSIZE 64
 
-__attribute__((noreturn)) static void panic(char* msg){
-    perror(msg);
-    exit(EXIT_FAILURE);
-}
 
 int main(void){
 
     struct sockaddr_in server;
-
-    char ACK[1] = ".";
 
     int sock;
     char buf[1024];
@@ -72,43 +68,32 @@ int main(void){
 
         write(sock, fname, sizeof(fname));
 
-        n = read(sock, buf, sizeof(buf));
-        if(!strcmp(buf, ACK))
-            panic("ACK: fname");
+        acknowledge(sock, "ACK: fname");
 
-
-        long int sent_bytes = 0;
         off_t fsize = lseek(fd, 0, SEEK_END);
+        long int bytes_to_send = (long int)fsize;
         lseek(fd, 0, SEEK_SET);
+
         char fsize_c[256];
-
         printf("fsize: %ld\n", (long int)fsize);
-
         sprintf(fsize_c, "%d", (int)fsize);
-
         write(sock, fsize_c, sizeof(fsize_c));
 
-        n = read(sock, buf, sizeof(buf));
-        if(!strcmp(buf, ACK))
-            panic("ACK: fsize");
+        acknowledge(sock, "ACK: fsize");
 
-        while(sent_bytes < (long int)fsize){
-            if((long int)fsize - sent_bytes >= FILE_BUFSIZE){
+        while(bytes_to_send){
+            if(bytes_to_send >= FILE_BUFSIZE){
                 n = read(fd, buf, FILE_BUFSIZE);
                 write(sock, buf, n);
-                //lseek(fd, FILE_BUFSIZE, SEEK_CUR);
             }else{
-                n = read(fd, buf, (long int)fsize - sent_bytes);
+                n = read(fd, buf, bytes_to_send);
                 write(sock, buf, n);
-                //lseek(fd, n, SEEK_CUR);
             }
-            sent_bytes += n;
-            printf("%ld\r", sent_bytes);
+            bytes_to_send -= n;
+            printf("%ld\r", (long int)fsize-bytes_to_send);
         }
 
-        n = read(sock, buf, sizeof(buf));
-        if(!strcmp(buf, ACK))
-            panic("ACK: sent");
+        acknowledge(sock, "ACK: sent");
 
         printf("File sent.\n");
         close(fd);

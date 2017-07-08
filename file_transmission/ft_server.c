@@ -10,23 +10,18 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include "headers.h"
+
 #define PORT       8808
 #define BUFSIZE    1024
 #define FILE_BUFSIZE 64
 #define MAXCLIENT  10
-
-__attribute__((noreturn)) static void panic(char* msg){
-    perror(msg);
-    exit(EXIT_FAILURE);
-}
 
 
 int main(int argc,char *argv[]){
 
     struct sockaddr_in saddr;
     struct sockaddr_in caddr;
-
-    char ACK[1] = ".";
 
     int sock;          // sever socket
     int client_sock;
@@ -100,7 +95,7 @@ int main(int argc,char *argv[]){
                   panic("read");
               printf("file name: %s\n", buf);
               strcpy(fname, buf);
-              write(client_sock, ACK, sizeof(ACK));
+              write(client_sock, ACK, 1);
 
               n = read(client_sock, buf, sizeof(buf));
               long int fsize = atoll(buf);
@@ -110,13 +105,13 @@ int main(int argc,char *argv[]){
               write(client_sock, ACK, 1);
 
               int fd = open(fname, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP);
-              long int done_bytes = 0;
-              while(done_bytes < fsize){
+              long int bytes_to_receive = fsize;
+              while(bytes_to_receive){
                   n = read(client_sock, buf, sizeof(buf));
                   if (n < 0)
                       panic("read");
                   write(fd, buf, n);
-                  done_bytes += n;
+                  bytes_to_receive -= n;
               }
 
               write(client_sock, ACK, 1);
@@ -124,7 +119,6 @@ int main(int argc,char *argv[]){
               close(fd);
               printf("file transfer completed.\n");
             
-              write(client_sock, buf, n);
               if(!strcmp(buf, "q")){
                   printf("client disconnected\n");
                   break;
