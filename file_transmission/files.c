@@ -67,3 +67,39 @@ int send_file(int sock, char* fname_with_path){
 
     return bytes_to_send;
 }
+
+int recv_file(int sock){
+    int n;
+    char buf[1024];
+    char fname[256];
+
+    n = read(sock, buf, sizeof(buf));
+    if (n < 0)
+        panic("read");
+
+    printf("file name: %s\n", buf);
+    strcpy(fname, buf);
+    write(sock, ACK, 1);
+
+    n = read(sock, buf, sizeof(buf));
+    long int fsize = atoll(buf);
+    printf("file size: %ld\n", fsize);
+    if (n < 0)
+        panic("read");
+    write(sock, ACK, 1);
+
+    int fd = open(fname, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP);
+    long int bytes_to_receive = fsize;
+    while(bytes_to_receive){
+        n = read(sock, buf, sizeof(buf));
+        if (n < 0)
+            panic("read");
+        write(fd, buf, n);
+        bytes_to_receive -= n;
+    }
+
+    write(sock, ACK, 1);
+
+    close(fd);
+    return bytes_to_receive;
+}

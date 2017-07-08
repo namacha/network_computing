@@ -3,4 +3,6 @@
 
 int send_file(int sock, char* fname);
 
+int recv_file(int sock);
+
 #endif
