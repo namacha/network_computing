@@ -28,7 +28,7 @@ int main(void){
 
     printf("Ready to send message to %s...\n", to_addr);
 
-    while(1){
+    while(strcmp(buf, "q")){
         printf("> ");
         scanf("%s", buf);
 
@@ -40,7 +40,7 @@ int main(void){
         recv(sock, buf, sizeof(buf), 0);
 
         gettimeofday(&time_new, NULL);
-        printf("RTT: %ld.%d[sec]\n", time_new.tv_sec - time_old.tv_sec, time_new.tv_usec - time_old.tv_usec);
+        printf("RTT: %ld.%06d[sec]\n", time_new.tv_sec - time_old.tv_sec, time_new.tv_usec - time_old.tv_usec);
 
         printf("%s\n", buf);
 
