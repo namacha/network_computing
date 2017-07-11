@@ -52,8 +52,13 @@ int main(void){
 
         inet_ntop(AF_INET, &sender.sin_addr, sender_str, sizeof(sender_str));
         
-        printf("%s", buf);
+        printf("%s\n", buf);
         printf("from %s:%d\n", sender_str, ntohs(sender.sin_port));
+
+        if(!strcmp(buf, "q")){
+            printf("client %s disconnected\n", sender_str);
+            break;
+        }
 
     }
 

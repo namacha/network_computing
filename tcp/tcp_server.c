@@ -12,7 +12,7 @@
 #define MAXCLIENT  10
 
 
-void panic(char* msg){
+__attribute__((noreturn)) static void panic(char* msg){
     perror(msg);
     exit(EXIT_FAILURE);
 }
@@ -25,6 +25,7 @@ int main(void){
 
     int sock;          // sever socket
     int client_sock;
+    char client_str[16];
 
     socklen_t len;
 
@@ -73,17 +74,34 @@ int main(void){
         if (client_sock < 0)
             panic("accept");
 
-        printf("Connection accepted from: %s:%d\n", inet_ntoa(caddr.sin_addr), ntohs(caddr.sin_port));
+
+        int client_port;
+
+//        client_addr = inet_ntoa(caddr.sin_addr);
+        client_port = ntohs(caddr.sin_port);
+
+
+        printf("Connection accepted from: %s:%d\n", inet_ntoa(caddr.sin_addr), client_port);
 
         pid = fork();
 
         if (pid == 0){
             while(1){
+
               n = read(client_sock, buf, sizeof(buf));
+
+              printf("%s\n", buf);
+              inet_ntop(AF_INET, &caddr.sin_addr, client_str, sizeof(client_str));
+              printf("from %s:%d\n", client_str, ntohs(caddr.sin_port));
+
               if (n < 0)
                   panic("read");
-            
+
               write(client_sock, buf, n);
+              if(!strcmp(buf, "q")){
+                  printf("client %s disconnected\n", client_str);
+                  break;
+                }
               }
             }
         }
