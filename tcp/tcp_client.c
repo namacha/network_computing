@@ -50,7 +50,7 @@ int main(void){
 
         gettimeofday(&time_n, NULL);
 
-        printf("RTT: %ld.%d[sec]\n", time_n.tv_sec - time_o.tv_sec, time_n.tv_usec - time_o.tv_usec);
+        printf("RTT: %ld.%06d[sec]\n", time_n.tv_sec - time_o.tv_sec, time_n.tv_usec - time_o.tv_usec);
 
         printf("%d, %s\n", n, buf);
     }while(strcmp(buf, "q"));
