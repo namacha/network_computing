@@ -10,7 +10,7 @@
 
 unsigned char ACK[] = {0xff};
 
-__attribute__((noreturn)) static void panic(char* msg){
+__attribute__((noreturn)) void panic(char* msg){
     perror(msg);
     exit(EXIT_FAILURE);
 }

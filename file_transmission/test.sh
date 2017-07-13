@@ -9,7 +9,7 @@ pid=$!
 expect -c "
 spawn ./client
 expect \">\"
-send \"test.png\n\"
+send \"${file}\n\"
 expect File
 exit 0
 "
