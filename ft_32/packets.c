@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <unistd.h>
+#include <string.h>
 
 #include "packets.h"
 
@@ -66,21 +68,25 @@ void deserialize_command(unsigned char *buffer, struct command *value){
     buffer = deserialize_int(buffer, &value->fsize);
 }
 
+void send_command(int sock, unsigned char cmd, char *fname, char *fname_with_path, int fsize){
+    struct command value;
+    unsigned char bytes[PACKET_LENGTH], *ptr;
+
+    value.cmd = cmd;
+    strcpy(value.fname, fname);
+    strcpy(value.fname_with_path, fname_with_path);
+    value.fsize = fsize;
+
+    ptr = serialize_command(bytes, &value);
+
+    write(sock, bytes, PACKET_LENGTH);
+}
 
 
-/*int main(){
-    struct command ack = {ACK, "5.jpg", "/home/ics-01/ayu/a/img/5.jpg", 4974889};
-    struct command received;
-    unsigned char buffer[PACKET_LENGTH], *ptr;
-    int i;
-    bzero(buffer, sizeof(buffer));
+void receive_command(int sock, struct command *value){
+    unsigned char bytes[PACKET_LENGTH];
+    int n;
 
-    ptr = serialize_command(buffer, &ack);
-    for(i=0;i<PACKET_LENGTH;i++)
-        printf("%x ", buffer[i]);
-    printf("\n");
-    deserialize_command(ptr-PACKET_LENGTH, &received);
-    printf("cmd = %x\n fname = %s\nfname_with_path = %s\nfsize = %lu\n", received.cmd, received.fname, received.fname_with_path, received.fsize);
-
-    return 0;
-}*/
+    n = read(sock, bytes, PACKET_LENGTH);
+    deserialize_command(&bytes[0], value);
+}

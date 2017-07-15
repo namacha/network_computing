@@ -15,12 +15,23 @@ __attribute__((noreturn)) void panic(char* msg){
     exit(EXIT_FAILURE);
 }
 
+
+void send_ack(int sock){
+    struct command ack;
+    char bytes[PACKET_LENGTH], *ptr;
+
+    ack.cmd = ACK;
+    ptr = serialize_command(bytes, &ack);
+    write(sock, bytes, PACKET_LENGTH);
+}
+
 void acknowledge(int sock, char* msg){
-    char buf[32];
+    struct command decoded;
+    char buf[PACKET_LENGTH];
     int n;
-    n = read(sock, buf, 1);
-    buf[1] = '\0';
-    if(strcmp(buf, ACK)){
+    n = read(sock, buf, PACKET_LENGTH);
+    deserialize_command(&buf[0], &decoded);
+    if(decoded.cmd != ACK){
         perror(msg);
         exit(EXIT_FAILURE);
     }

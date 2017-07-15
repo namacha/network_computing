@@ -82,20 +82,24 @@ int main(int argc,char *argv[]){
 
         pid = fork();
 
+
         if (pid == 0){
             while(1){
                 struct command decoded;
-                n = read(client_sock, buf, PACKET_LENGTH);
-                for(int i=0;i<PACKET_LENGTH;i++)
-                    printf("%x ", buf[i]);
-                printf("\n");
-                deserialize_command(&buf[0], &decoded);
-                printf("%x, %s, %s, %lu\n", decoded.cmd, decoded.fname, decoded.fname_with_path, decoded.fsize);
-                if(decoded.cmd == SEND){
-                    recv_file(client_sock, &decoded);
+
+                receive_command(client_sock, &decoded);
+                send_ack(client_sock);
+
+                if(decoded.cmd == CLOSE){
+                    close(client_sock);
+                    printf("Disconnected\n");
+                    break;
+                }
+                else if(decoded.cmd == SEND){
+                    recv_file(client_sock);
                 }
                 else if(decoded.cmd == REQ){
-                    send_file(client_sock, &decoded);
+                    send_file(client_sock, decoded.fname_with_path);
                 }
              }
             }

@@ -28,11 +28,6 @@ int main(void){
     int sock;
     char buf[1024];
 
-    char fname[256];
-    char fname_with_path[256];
-    char *token;
-    long int n;
-
     int result;
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -61,15 +56,26 @@ int main(void){
         scanf("%s", user_command);
 
         if(!strcmp(user_command, "quit")){
+            send_command(sock, CLOSE, "", "", 0);
+            acknowledge(sock, "close connection");
             printf("Bye.\n");
+            close(sock);
             exit(0);
         }
 
         printf("Enter filename with full path.\n> ");
         scanf("%s", user_filename);
 
-        if(!strcmp(user_command, "upload"))
+        if(!strcmp(user_command, "upload")){
+            send_command(sock, SEND, "", "", 0);
+            acknowledge(sock, "sent cmd");
             send_file(sock, user_filename);
+        }
+        if(!strcmp(user_command, "download")){
+            send_command(sock, REQ, "", user_filename, 0);
+            acknowledge(sock, "sent cmd REQ");
+            recv_file(sock);
+        }
     }
 
 

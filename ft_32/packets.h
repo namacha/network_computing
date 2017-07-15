@@ -29,4 +29,7 @@ unsigned char * deserialize_int(unsigned char *buffer, int *dst);
 unsigned char * serialize_command(unsigned char *buffer, struct command *value);
 void deserialize_command(unsigned char *buffer, struct command *value);
 
+void send_packet(int sock, unsigned char cmd, char *fname, char *fname_with_path, int fsize);
+void receive_command(int sock, struct command *value);
+     
 #endif
